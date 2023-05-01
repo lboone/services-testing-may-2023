@@ -14,10 +14,12 @@ public class DemoController : ControllerBase
     [HttpGet("/demo")]
     public async Task<ActionResult> GetTheDemo()
     {
+        var currentTime = _clock.GetCurrent();
         var response = new DemoResponse
         {
             Message = "Hello from the Api!",
-            CreatedAt = _clock.GetCurrent()
+            CreatedAt = currentTime,
+            GettingCloseToQuittingTime = currentTime.Hour >= 16
         };
         return Ok(response);
     }// This class is garbage collected.
