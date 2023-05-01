@@ -1,5 +1,5 @@
-﻿using Banking;
-using System.Security.Principal;
+﻿
+using Banking;
 
 namespace ScratchTests.BankAccount;
 
@@ -10,11 +10,12 @@ public class NewAccount
     {
         // Given
         var account = new Account();
-        
+
         // When
         decimal openingBalance = account.GetBalance();
 
         // Then
         Assert.Equal(5000M, openingBalance);
     }
+
 }

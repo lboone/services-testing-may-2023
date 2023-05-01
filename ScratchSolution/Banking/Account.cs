@@ -10,6 +10,24 @@ public class Account
 
     public decimal GetBalance()
     {
-        return _balance;
+        return _balance; // "Slimed" means fake, can't stay - Gary Bernhardt
     }
+
+    public void Withdraw(decimal amountToWithdraw)
+    {
+        GuardAgainstOverdraft(amountToWithdraw);
+
+
+        _balance -= amountToWithdraw;
+
+    }
+
+    private void GuardAgainstOverdraft(decimal amount)
+    {
+        if (amount > _balance)
+        {
+            throw new AccountOverdraftException();
+        }
+    }
+
 }
