@@ -8,3 +8,5 @@ public record DemoResponse
     public bool GettingCloseToQuittingTime { get; set; }
   
 } 
+
+

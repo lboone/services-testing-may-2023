@@ -1,0 +1,47 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://marketplace.visualstudio.com/items?itemName=pomdtr.excalidraw-editor",
+  "elements": [
+    {
+      "id": "7LSDGHs9clIf9CKUFANUv",
+      "type": "text",
+      "x": 236,
+      "y": 141,
+      "width": 1160.51904296875,
+      "height": 450,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "hachure",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "roundness": null,
+      "seed": 2083552519,
+      "version": 777,
+      "versionNonce": 849603785,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1683054651414,
+      "link": null,
+      "locked": false,
+      "text": "Test Doubles\n    - A \"generic\" term for objects we use in testing to replace \"real\" objects that are used in production code.\n    - We use these to simulate different scenarios.\n\n\n\nIn our unique checker thing it's a method that returns a value based on the parameters.\n    - IsUniqueAsync(\"tacos\"):\" true or false\n    - \"Stub\" - a test double that just returned canned responses for questions.\n\n\nA test double for a method that does not return data that we can use to check the \"state\" is called a \"Mock\"\n\nA test double that isn't part of the test, but you need it so you don't get a null reference exception is a \"dummy\"\n\nA test double that just replaces something too expensive or hard to use in testing is \"Fake\"\n    - Using fake testing databases, etc. We will do this.\n   ",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "baseline": 443,
+      "containerId": null,
+      "originalText": "Test Doubles\n    - A \"generic\" term for objects we use in testing to replace \"real\" objects that are used in production code.\n    - We use these to simulate different scenarios.\n\n\n\nIn our unique checker thing it's a method that returns a value based on the parameters.\n    - IsUniqueAsync(\"tacos\"):\" true or false\n    - \"Stub\" - a test double that just returned canned responses for questions.\n\n\nA test double for a method that does not return data that we can use to check the \"state\" is called a \"Mock\"\n\nA test double that isn't part of the test, but you need it so you don't get a null reference exception is a \"dummy\"\n\nA test double that just replaces something too expensive or hard to use in testing is \"Fake\"\n    - Using fake testing databases, etc. We will do this.\n   ",
+      "lineHeight": 1.25
+    }
+  ],
+  "appState": {
+    "gridSize": null,
+    "viewBackgroundColor": "#ffffff"
+  },
+  "files": {}
+}

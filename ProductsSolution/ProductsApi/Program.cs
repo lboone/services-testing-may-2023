@@ -1,6 +1,7 @@
 using ProductsApi.Adapters;
 using ProductsApi.Demo;
-
+using ProductsApi.Products;
+using Marten;
 // CreateBuilder adds the "standard" good defaults for EVERYTHING
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +14,23 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 // 198 services
 builder.Services.AddSingleton<ISystemClock, SystemClock>(); // + 1
+builder.Services.AddScoped<IManageTheProductCatalog, ProductManager>();
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddScoped<IGenerateSlugs, SlugGenerator>();
+    builder.Services.AddScoped<ICheckForUniqueValues, ProductSlugUniquenessChecker>();
+}
 
+var productsConnectionString = builder.Configuration.GetConnectionString("products") ?? throw new ArgumentNullException("Need a connection string for the products data base");
+
+builder.Services.AddMarten(options =>
+{
+    options.Connection(productsConnectionString);
+    if(builder.Environment.IsDevelopment())
+    {
+        options.AutoCreateSchemaObjects = Weasel.Core.AutoCreate.All;
+    }
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -22,6 +39,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 
 
 app.MapGet("/demo", (ISystemClock clock) =>
