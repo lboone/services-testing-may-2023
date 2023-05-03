@@ -3,36 +3,23 @@ using Alba;
 using Marten;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using ProductsApi.IntegrationTests.Products.Fixtures;
 using ProductsApi.Products;
 
 namespace ProductsApi.IntegrationTests.Products;
 
-public class AddingProducts
+// Note: There is also a "ICollectionFixture" 
+public class AddingProducts : IClassFixture<ProductsDatabaseFixture>
 {
+    private readonly IAlbaHost _host;
+    public AddingProducts(ProductsDatabaseFixture fixture)
+    {
+        _host = fixture.AlbaHost;
+    }
     [Fact]
     public async Task CreatingAProduct()
     {
-        var mockedDocumentSession = new Mock<IDocumentSession>();
-        await using var host = await AlbaHost.For<Program>(options =>
-        {
-            options.ConfigureServices((context, sp) =>
-            {
-
-                sp.AddScoped<IDocumentSession>(sp =>
-                {
-                    return mockedDocumentSession.Object;
-                });
-
-                sp.AddScoped<ICheckForUniqueValues>(sp =>
-                {
-                  
-                    var stubbedUniqueChecker = new Mock<ICheckForUniqueValues>(); 
-                    stubbedUniqueChecker.Setup(u => u.IsUniqueAsync(It.IsAny<string>())).ReturnsAsync(true);
-                    return stubbedUniqueChecker.Object;
-                });
-            });
-        });
-
+        
         var request = new CreateProductRequest
         {
             Name ="Super Deluxe Dandruff Shampoo",
@@ -59,10 +46,12 @@ public class AddingProducts
             }
 
         };
-        var response = await host.Scenario(api =>
+        var response = await _host.Scenario(api =>
         {
             api.Post.Json(request).ToUrl("/products");
             api.StatusCodeShouldBe(201);
+            api.Header("location")
+            .SingleValueShouldMatch(new System.Text.RegularExpressions.Regex("http://localhost/products/" + expectedResponse.Slug));
         });
 
         var actualResponse = response.ReadAsJson<CreateProductResponse>();
@@ -70,7 +59,16 @@ public class AddingProducts
 
         Assert.Equal(expectedResponse, actualResponse);
 
-        mockedDocumentSession.Verify(s => s.Insert(It.IsAny<CreateProductResponse>()), Times.Once);
-        mockedDocumentSession.Verify(s => s.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Exactly(1));
+        // "Shallow Testing"
+        //mockedDocumentSession.Verify(s => s.Insert(It.IsAny<CreateProductResponse>()), Times.Once);
+        //mockedDocumentSession.Verify(s => s.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Exactly(1));
+
+        var savedResonse = await _host.Scenario(api =>
+        {
+            api.Get.Url("/products/" + actualResponse.Slug);
+            api.StatusCodeShouldBeOk(); // 200
+        });
+        var lookupResponseProduct = savedResonse.ReadAsJson<CreateProductResponse>();
+        Assert.Equal(expectedResponse, lookupResponseProduct);
     }
 }
