@@ -3,8 +3,12 @@ using Alba;
 using Marten;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using ProductsApi.Adapters;
 using ProductsApi.IntegrationTests.Products.Fixtures;
 using ProductsApi.Products;
+using WireMock.RequestBuilders;
+using WireMock.ResponseBuilders;
+using WireMock.Server;
 
 namespace ProductsApi.IntegrationTests.Products;
 
@@ -12,22 +16,24 @@ namespace ProductsApi.IntegrationTests.Products;
 public class AddingProducts : IClassFixture<ProductsDatabaseFixture>
 {
     private readonly IAlbaHost _host;
+    private readonly WireMockServer _mockServer;
     public AddingProducts(ProductsDatabaseFixture fixture)
     {
         _host = fixture.AlbaHost;
+        _mockServer = fixture.MockServer;
     }
     [Fact]
     public async Task CreatingAProduct()
     {
-        
+
         var request = new CreateProductRequest
         {
-            Name ="Super Deluxe Dandruff Shampoo",
-            Cost = 120.88M,
+            Name = "Super Deluxe Dandruff Shampoo",
+            Cost = 18,
             Supplier = new SupplierInformation
             {
                 Id = "bobs-shop",
-                SKU  = "19891"
+                SKU = "19891"
             }
         };
 
@@ -39,13 +45,25 @@ public class AddingProducts : IClassFixture<ProductsDatabaseFixture>
                 Retail = 42.23M,
                 Wholesale = new ProductPricingWholeInformation
                 {
-                    Wholesale = 40.23M,
-                    MinimumPurchaseRequired = 10
+                    Wholesale = 32.04M,
+                    MinimumPurchaseRequired = 5
 
                 }
             }
 
         };
+
+        _mockServer.Given(Request.Create().WithPath($"/suppliers/{request.Supplier.Id}/products/{request.Supplier.SKU}"))
+            .RespondWith(Response.Create()
+                .WithStatusCode(200)
+                .WithBodyAsJson(new SupplierPricingInformationResponse
+                {
+                    AllowWholesale = true,
+                    RequiredMsrp = 42.23M
+                }
+            ));
+
+
         var response = await _host.Scenario(api =>
         {
             api.Post.Json(request).ToUrl("/products");
@@ -71,4 +89,28 @@ public class AddingProducts : IClassFixture<ProductsDatabaseFixture>
         var lookupResponseProduct = savedResonse.ReadAsJson<CreateProductResponse>();
         Assert.Equal(expectedResponse, lookupResponseProduct);
     }
+
 }
+
+
+public class AddingProductsFixture : ProductsDatabaseFixture
+{
+    protected override void ConfigureAdditionalServices(IServiceCollection services)
+    {
+        //            Id = "bobs-shop",
+        // SKU = "19891"
+        var stubbedResponse = new SupplierPricingInformationResponse
+        {
+            AllowWholesale = false,
+            RequiredMsrp = 42.23M
+
+        };
+        var stubbedProductsApiAdapter = new Mock<PricingApiAdapter>(null);
+        stubbedProductsApiAdapter.Setup(a => a.GetThePricingInformationAsync("bobs-shop", "19891"))
+            .ReturnsAsync(stubbedResponse);
+
+        services.AddScoped<PricingApiAdapter>(sp => stubbedProductsApiAdapter.Object);
+    }
+}
+
+

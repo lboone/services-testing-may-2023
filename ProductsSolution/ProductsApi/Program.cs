@@ -15,11 +15,17 @@ builder.Services.AddSwaggerGen();
 // 198 services
 builder.Services.AddSingleton<ISystemClock, SystemClock>(); // + 1
 builder.Services.AddScoped<IManageTheProductCatalog, ProductManager>();
+builder.Services.AddScoped<IManagePricing, PricingManager>();
 
 
+var pricingApiUri = builder.Configuration.GetValue<string>("PricingApiUrl") ?? throw new ArgumentNullException("No Pricing API Url Configured");
+builder.Services.AddHttpClient<PricingApiAdapter>(client =>
+{
+    client.BaseAddress = new Uri(pricingApiUri);
+});
 
-builder.Services.AddScoped<IGenerateSlugs, SlugGenerator>();
-builder.Services.AddScoped<ICheckForUniqueValues, ProductSlugUniquenessChecker>();
+builder.Services.AddScoped<IGenerateSlugs, SlugGeneratorFacade>();
+builder.Services.AddScoped<SlugGenerators.ICheckForUniqueValues, ProductSlugUniquenessChecker>();
 
 var productsConnectionString = builder.Configuration.GetConnectionString("products") ?? throw new ArgumentNullException("Need a connection string for the products data base");
 

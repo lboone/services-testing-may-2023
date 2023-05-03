@@ -1,4 +1,5 @@
 ﻿using Marten;
+using SlugGenerators;
 
 namespace ProductsApi.Products;
 
